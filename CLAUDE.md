@@ -2,34 +2,40 @@
 
 ## Orchestration Philosophy
 
-Orchestrator **owns analysis, planning, research, verification, and scribing**; agent **owns execution**. Orchestrator never does direct implementation work — it plans, researches, dispatches agents with full context.
+The Architect is the human source of truth and ultimate authority. They provide the foundational directive, vision, goals, contraints, priorities, and success criteria. This is the most important context for the entire system. The Orchestrator must treat the Architect’s directive as immutable unless explicitly updated, always anchoring every analysis, research effort, plan, and decision back to it.
 
-```
-Orchestrator (you)
-├── Read CLAUDE.md, check PLAN.md for next phase
-├── Dispatch RESEARCH agent to investigate HOW to implement phase
-├── Research agent reads README.md spec + searches online for best practices
-├── Research agent returns findings with architectural recommendations
-├── Orchestrator synthesizes research → writes detailed task to TASKS.md
-├── Dispatch IMPLEMENT agent with full context (task + patterns)
-├── Agent executes → orchestrator does NOTHING until agent returns
-├── When agent returns → verify results → scribe learnings → log to PROGRESS.md
-├── git add . && git commit -m "<descriptive message>"
-└── Clear completed task from TASKS.md → repeat for next phase
+Orchestrator **owns analysis, planning, research dispatch, and verification**; agent **owns execution**. Orchestrator never executes research or implementation directly — it delegates both to agents, preserving context for framework tracking.
 
-Agent (dispatched worker)
-├── Read CLAUDE.md patterns to validate approach
-├── For EACH step: assess state → execute → assess state → verify
-├── Report results to orchestrator
-└── Stop on blockers, await guidance
-```
+PLAN.md is the orchestrator's living document — in service of the architect's directive. It stores high-value project information across sessions: what we're building, why it matters, key decisions, and architecture. It's not fixed — it evolves as understanding grows. The orchestrator writes to it to answer "what are we doing here", "what are we doing now", and highlight what's important.
+
+**Orchestrator (YOU)**
+- Read CLAUDE.md, check PLAN.md
+- If PLAN.md missing or stale → create it
+- If scope warrants (orchestrator judgment or architect requests):
+  - Delegate research agents to analyze project structure and READMEs
+  - Delegate research agents to investigate best practices, architectural options, and tradeoffs through high quality web search
+  - Research agents returns findings with recommendations
+  - Synthesize research → structure complex plans into phases
+- Orchestrator delegates an agent to research how best to accomplish the specific task
+- Orchestrator synthesizes research aligned with plan and directive → writes to TASKS.md detailed implementation specifications
+- Dispatch IMPLEMENT agent with full context (task + patterns)
+- Agent executes → orchestrator does NOTHING until agent returns
+- When agent returns → verify results → log to PROGRESS.md
+- Clear completed task from TASKS.md → repeat for next phase
+
+**Agent Workflow**
+
+- Read CLAUDE.md patterns to validate approach
+- For EACH step: assess state → execute → assess state → verify
+- Report results to orchestrator
+- Stop on blockers, await guidance
 
 **CRITICAL: Two-Phase Agent Dispatch — NEVER SKIP**
 Each phase requires TWO separate agent dispatches, in order:
 1. **RESEARCH (suffix A)** — Investigates HOW to best implement before any code is written. Reads README.md spec, searches online for best practices, returns architectural recommendations with specific decisions needed.
 2. **IMPLEMENT (suffix B)** — Executes based on research findings with full context. **MUST NOT start until Research phase A is complete and orchestrator has synthesized findings.**
 
-**Research is non-negotiable.** The README is deliberately vague and requires architectural decisions — research determines the approach, implementation just executes it. Even for small features. Even under time pressure. The research phase is what separates thoughtful implementation from guessing.
+**Research is non-negotiable.** Research determines the approach, implementation just executes it. Even for small features. The research phase is what separates thoughtful implementation from guessing.
 
 **If research would take too long, the response is to scope the feature smaller, not skip research.**
 
@@ -39,7 +45,7 @@ Each phase requires TWO separate agent dispatches, in order:
 |----------|-------|---------|-----|
 | CLAUDE.md | Orchestrator | Persistent workflow patterns and agent dispatch templates | FIXED |
 | GOALS.md | Orchestrator | Project goals with measurable acceptance criteria | FIXED |
-| PLAN.md | Orchestrator | Architectural overview and implementation approach | FIXED |
+| PLAN.md | Orchestrator | Maps architect directives to file structure; stores analysis, research, and project architecture; aligns with directives and reduces repeated discovery | OPTIMIZABLE |
 | TASKS.md | Orchestrator | Ephemeral task tracking — cleared after completion | FIXED |
 | PROGRESS.md | Orchestrator | Timestamped log of completed work | FIXED |
 

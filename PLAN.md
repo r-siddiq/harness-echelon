@@ -66,34 +66,6 @@ const AUDIT_ACTION_SHARE = 'share';
 - PHP files are readable and debuggable
 - Batch transactions prevent partial migration state on failure
 
-**Migration file structure:**
-```php
-<?php
-// migrations/001_add_scheduled_at.php
-$migrations = db()->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'")->fetchAll();
-$applied = array_column($migrations, 'name');
-if (!in_array('001_add_scheduled_at', $applied)) {
-    db()->exec("ALTER TABLE documents ADD COLUMN scheduled_at TEXT");
-    db()->exec("INSERT INTO migrations (name) VALUES ('001_add_scheduled_at')");
-}
-?>
-```
-
-**Batch runner (improved):**
-```php
-$pdo->beginTransaction();
-try {
-    foreach ($pendingMigrations as $file) {
-        $pdo->exec(file_get_contents($file));
-        $pdo->exec("INSERT INTO schema_migrations ...");
-    }
-    $pdo->commit();
-} catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
-}
-```
-
 ---
 
 ## Feature Plan: Scheduled Publishing
@@ -374,10 +346,6 @@ Add proper session-based authentication, CSRF protection on POST forms, search w
 
 **Migration file:** `migrations/006_add_auth.php`
 
-```sql
-ALTER TABLE staff ADD COLUMN password_hash TEXT;
-```
-
 ### Files to Create (2)
 
 | File | Purpose |
@@ -413,32 +381,6 @@ require_auth()   → if empty($_SESSION['staff_id'])
                  → header('Location: /login.php') + exit
 ```
 
-### CSRF Helpers (bootstrap.php)
-
-```php
-function csrf_token(): string {
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
-
-function validate_csrf(string $token): bool {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
-}
-```
-
-Each POST form gets: `<input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">`
-
-Each POST handler starts:
-```php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!validate_csrf($_POST['csrf_token'] ?? '')) {
-        http_response_code(419);
-        $error = 'Session expired, please try again.';
-    }
-}
-```
 
 ### Seed Data
 
@@ -455,9 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 Print credential table to stdout after seeding.
 
-### view.php — No Changes
 
-Recipients don't authenticate. Share links work as before.
 
 ### Testing
 
@@ -469,10 +409,5 @@ Add 4 new tests to `tests/test.php`:
 
 ---
 
-## Deferred: Timezone Fix for scheduled_at
-
-Store INTEGER Unix timestamp instead of TEXT for timezone-independent scheduling. Deferred to own phase — requires migration, updated admin.php conversion, and updated view.php comparison.
-
-**Changes:** `ALTER TABLE documents ADD COLUMN scheduled_at INTEGER` (new column), migrate existing TEXT values, drop old column, rename new. Both admin.php and view.php compare integers directly.
 
 **
