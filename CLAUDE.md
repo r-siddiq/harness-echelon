@@ -48,7 +48,7 @@ PROGRESS.md: Timestamp of completion log — written by orchestrator immediately
 | CLAUDE.md | Orchestrator | Persistent workflow patterns and agent dispatch templates | FIXED |
 | PLAN.md | Orchestrator | Maps architect directives to file structure; stores analysis, research, and project architecture; aligns with directives and reduces repeated discovery | OPTIMIZABLE |
 | TASKS.md | Orchestrator | Ephemeral task tracking — cleared after completion | OPTIMIZABLE |
-| PROGRESS.md | Orchestrator | Append-only timestamped log of completed work | OPTIMIZABLE |
+| PROGRESS.md | Orchestrator | Append-only timestamped log of completed work | APPEND |
 
 ## Trust Boundaries
 

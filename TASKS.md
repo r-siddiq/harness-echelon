@@ -13,10 +13,9 @@ PLAN.md phase → TASKS.md outline → RESEARCH agent (A) → IMPLEMENT agent (B
 | Document | Role | Tag |
 |----------|------|-----|
 | CLAUDE.md | Orchestrator patterns, agent dispatch template | FIXED |
-| GOALS.md | What + priority (milestone criteria) | FIXED |
-| PLAN.md | How (architecture, phase sequence) | FIXED |
-| TASKS.md | Doing (ephemeral task breakdown) | FIXED |
-| PROGRESS.md | Done (timestamped log) | FIXED |
+| PLAN.md | How (architecture, phase sequence) | OPTIMIZABLE |
+| TASKS.md | Doing (ephemeral task breakdown) | OPTIMIZABLE |
+| PROGRESS.md | Done (timestamped log) | APPEND |
 
 ## Workflow
 
