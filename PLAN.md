@@ -1,49 +1,41 @@
 # PLAN.md — Architect Directive Mapping
 
-## Purpose
-
-PLAN.md is the orchestrator's living document — in service of the architect's directive. It maps directives to file structure, stores high-value analysis and research, and captures project architecture. It answers "what are we doing here", "what are we doing now", and highlights what's important. Evolves as understanding grows.
-
-## Entry Format
+## Template (Do Not Remove)
 
 ```markdown
+## Active Directives
+
 ## Directive: [Directive Name]
 
-**Architect Intent:** One sentence on why this directive matters
+**Architect Intent:** [What the architect wants to achieve]
 
-**Scope:** Brief description of what's in scope and what's explicitly out of scope
+**Scope:**
+- In scope: [What is included]
+- Out of scope: [What is excluded]
 
-**File Structure Mapping:**
-- path/to/file1 — purpose
-- path/to/file2 — purpose
+**Phase Sequence:**
+1. Phase 1: [Name] — [Brief description]
+[...]
 
 **Key Decisions:**
-- Decision: [what was chosen] → [alternative considered]
+- Decision: [Option A] vs [Option B] → [Resolution]
+[...]
 
 **Risks:**
-- Risk: [description] — [mitigation]
+- Risk: [Description] — [Mitigation]
+[...]
 
-**Phase Sequence (if applicable):**
-1. Phase name — brief description
-2. Phase name — brief description
+**Task Mapping:**
+- Phase X tasks → [What happens in this phase]
+[...]
+
+**Progress Reference:**
+See .tasks.json for active task state. See PROGRESS.md for completion log with timestamps and decisions.
 ```
 
-## Sections
+---
 
-### Active Directives
-List of current architect directives being worked on.
+## Active Directives (Modifiable)
 
-### Architecture
-High-level project structure, patterns, and technical decisions.
+### Directive:
 
-### Key Decisions
-Significant decisions made, the options considered, and why one was chosen.
-
-### Risks & Mitigations
-Known risks and how they've been mitigated.
-
-### Research Notes
-High-value findings from research agents that inform architectural decisions.
-
-### File Structure
-Canonical project layout with purpose for each directory/file.

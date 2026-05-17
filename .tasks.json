@@ -1,0 +1,40 @@
+{
+  "version": 1,
+
+  "_persistentBaseState": {
+    "description": "PERSISTENT BASE STATE — Do Not Remove. This defines the orchestrator task tracking structure. Full reference in PLAN.md Template section.",
+    "structure": {
+      "activePhase": "Current phase name (e.g., 'Phase 1: Research') - empty when directive complete",
+      "tasks": {
+        "_taskId": {
+          "id": "Descriptive hyphenated ID (e.g., Phase-1-Task-1)",
+          "phase": "Phase X: [Name]",
+          "description": "What needs to be accomplished",
+          "files": ["path/to/file1", "path/to/file2"],
+          "successCriteria": ["Specific measurable criterion 1", "Specific measurable criterion 2"],
+          "state": "pending | in_progress | completed | blocked",
+          "agent": "Explore | general-purpose | claude",
+          "research": {
+            "summary": "High-level approach recommendation",
+            "decisions": ["Decision 1", "Decision 2"],
+            "context": {
+              "fileStructure": "Specific file paths and purposes",
+              "apiPattern": "Specific function signatures, class names, method names",
+              "dataFlow": "How components connect and pass data",
+              "gotchas": ["Common mistakes or edge cases to avoid"]
+            },
+            "verification": ["Specific things to verify in implementation"]
+          },
+          "progressEntry": "Brief summary for PROGRESS.md: what was done, why, key decision made",
+          "blockerReason": "If state is blocked — why it failed",
+          "researchNeeded": "If blocked — what needs investigation"
+        }
+      }
+    },
+    "clearingRules": "Cleared when: directive_complete OR phase_complete OR explicit architect direction. Blocked tasks remain until resolved."
+  },
+
+  "activePhase": "",
+
+  "tasks": {}
+}
