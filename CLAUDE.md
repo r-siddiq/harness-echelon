@@ -8,6 +8,15 @@ Orchestrator **owns analysis, planning, research dispatch, and verification**; a
 
 PLAN.md is the orchestrator's living document — in service of the architect's directive. It stores high-value project information across sessions: what we're building, why it matters, key decisions, and architecture. It's not fixed — it evolves as understanding grows. The orchestrator writes to it to answer "what are we doing here", "what are we doing now", and highlight what's important.
 
+TASKS.md is the orchestrator's execution brief — exact, ephemeral task specifications derived from PLAN.md and architect directives. It is grounded in research. Each task is concrete and bounded, scoped to a single directive or plan phase with clear completion criteria. It answers "who does what, when, and how do we know it's done." Tasks are cleared when complete — no residual state.
+
+**CRITICAL: Two-Phase Agent Dispatch — NEVER SKIP**
+Each phase of creating a task requires TWO separate agent dispatches, in order:
+1. **RESEARCH** — Investigates HOW to best implement before any code is written. Reads README.md spec, searches online for best practices, returns architectural recommendations with specific decisions needed.
+2. **IMPLEMENT** — Executes based on research findings with full context. **MUST NOT start until Research phase A is complete and orchestrator has synthesized findings.**
+
+PROGRESS.md: Timestamp of completion log — written by orchestrator immediately after task verification. Entries are concise, focused on the "why" and key technical decisions, not just listing what was done. Includes phase ID and files changed for traceability.
+
 **Orchestrator (YOU)**
 - Read CLAUDE.md, check PLAN.md
 - If PLAN.md missing or stale → create it
@@ -24,16 +33,9 @@ PLAN.md is the orchestrator's living document — in service of the architect's 
 - Clear completed task from TASKS.md → repeat for next phase
 
 **Agent Workflow**
-
-- Read CLAUDE.md patterns to validate approach
 - For EACH step: assess state → execute → assess state → verify
 - Report results to orchestrator
 - Stop on blockers, await guidance
-
-**CRITICAL: Two-Phase Agent Dispatch — NEVER SKIP**
-Each phase requires TWO separate agent dispatches, in order:
-1. **RESEARCH (suffix A)** — Investigates HOW to best implement before any code is written. Reads README.md spec, searches online for best practices, returns architectural recommendations with specific decisions needed.
-2. **IMPLEMENT (suffix B)** — Executes based on research findings with full context. **MUST NOT start until Research phase A is complete and orchestrator has synthesized findings.**
 
 **Research is non-negotiable.** Research determines the approach, implementation just executes it. Even for small features. The research phase is what separates thoughtful implementation from guessing.
 
@@ -44,16 +46,9 @@ Each phase requires TWO separate agent dispatches, in order:
 | Document | Owner | Purpose | Tag |
 |----------|-------|---------|-----|
 | CLAUDE.md | Orchestrator | Persistent workflow patterns and agent dispatch templates | FIXED |
-| GOALS.md | Orchestrator | Project goals with measurable acceptance criteria | FIXED |
 | PLAN.md | Orchestrator | Maps architect directives to file structure; stores analysis, research, and project architecture; aligns with directives and reduces repeated discovery | OPTIMIZABLE |
-| TASKS.md | Orchestrator | Ephemeral task tracking — cleared after completion | FIXED |
-| PROGRESS.md | Orchestrator | Timestamped log of completed work | FIXED |
-
-## Orchestrator Tools
-
-**Native (used directly):** `read`, `write`, `edit`, `glob`, `grep`, `bash`, `webfetch`, `Agent`
-
-**Agent Tools:** Agent — receives read, write, glob, grep, bash, webfetch
+| TASKS.md | Orchestrator | Ephemeral task tracking — cleared after completion | OPTIMIZABLE |
+| PROGRESS.md | Orchestrator | Append-only timestamped log of completed work | OPTIMIZABLE |
 
 ## Trust Boundaries
 
@@ -61,9 +56,9 @@ Explicit scope enforcement for agent safety:
 
 | Agent Type | Permissions | Restrictions |
 |------------|-------------|--------------|
-| `research` | read, glob, grep, bash, webfetch | Read-only — no file modifications |
-| `general-purpose` | read, write, glob, grep, bash, webfetch | Only modify specified files |
-| Orchestrator | All tools | Full access — dispatches agents, writes PROGRESS.md |
+| research | `read`, `glob`, `grep`, `bash`, `webfetch` | Read-only — no file modifications |
+| general-purpose | `read`, `write`, `edit`, `glob`, `grep`, `bash`, `webfetch` | Only modify specified files |
+| Orchestrator | `All tools` | Full access |
 
 **Handoff Pattern:** When one agent needs to transfer to another:
 ```
@@ -83,9 +78,9 @@ Include in every dispatch:
 
 ## Two-Phase Dispatch Pattern
 
-**RESEARCH agents (1A, 2A, 3A, 4A):** See [Research Output Schema](#research-output-schema) for requirements.
+**RESEARCH agents:** See [Research Output Schema](#research-output-schema) for requirements.
 
-**IMPLEMENT agents (1B, 2B, 3B, 4B):** See [Agent Instruction Template](#agent-instruction-template) for requirements.
+**IMPLEMENT agents:** See [Agent Instruction Template](#agent-instruction-template) for requirements.
 
 ### Orchestrator Post-Agent Verification
 
@@ -99,10 +94,10 @@ If verification fails: mark task blocked, specify what's wrong, await resolution
 
 ## Research Output Schema
 
-All research agents (1A, 2A, 3A, 4A) MUST return findings using this schema:
+All research agents MUST return findings using this schema:
 
 ```
-## Research Findings: [Phase Name]
+## Research Findings: [Phase Name / Directive]
 
 ### APPROACH
 Recommended implementation approach with rationale.
@@ -128,7 +123,7 @@ How to verify the implementation works:
 - [Specific test/verification method 2]
 ```
 
-**IMPLEMENT agents (1B, 2B, 3B, 4B):**
+**IMPLEMENT agents:**
 - Receive full context from orchestrator-synthesized research findings
 - Execute implementation based on approved approach
 - Follow snapshot/verify pattern
@@ -137,7 +132,7 @@ How to verify the implementation works:
 ### Agent Instruction Template (for IMPLEMENT agents)
 
 ```
-You are implementing [TASK NAME] for the Folio document-sharing app.
+You are implementing [Task / Directive].
 
 MANDATORY FIRST STEP: Read CLAUDE.md from the workspace to understand:
 - Orchestrator vs agent responsibilities
@@ -147,7 +142,7 @@ MANDATORY FIRST STEP: Read CLAUDE.md from the workspace to understand:
 - Commit hygiene requirements
 - Agent termination conditions and feedback patterns
 
-YOUR TASK: [Task description - derived from research phase findings]
+YOUR TASK: [Task description - derived from research findings]
 
 SUCCESS CRITERIA:
 - [Specific measurable criterion 1]
@@ -317,15 +312,12 @@ All code must include sufficient inline documentation:
 
 | Approach | Works? | Notes |
 |----------|--------|-------|
-| Research phase before implementation | ✅ | MUST happen for each phase — README is deliberately vague |
+| Research phase before implementation | ✅ | MUST happen for each phase — Critical |
 | Skipping research "just this once" | ❌ | Leads to guesswork; scope smaller feature instead |
 | Specific measurable success criteria | ✅ | Prevents scope creep and misaligned outputs |
 | Read file → verify → commit pattern | ✅ | Atomic, verifiable checkpoints |
-| Scribe learnings after each agent return | ✅ | Compounds efficiency over time |
-| Sequential phases (1A→1B→2A→2B→...) | ✅ | Never skip research phase |
-| Vague instructions like "implement feature X" | ❌ | Leads to incomplete or misaligned work |
 | Skipping verification after agent return | ❌ | Errors compound and become expensive to fix |
-| Implementation without research | ❌ | Violates workflow — README requires architectural decisions |
+| Implementation without research | ❌ | Violates workflow — Critial |
 | Parallel agents for same task | ❌ | Coordination overhead exceeds benefit |
 
 ## Failure-Driven Research
@@ -341,35 +333,5 @@ When blocked (error, unexpected behavior, tool failure):
 - Every task logged to PROGRESS.md before clearing from TASKS.md
 - One clean commit per logical unit of work
 - Commit log tells a coherent story of project progress
-- TASKS.md is empty or near-empty at project completion
-- CLAUDE.md updated with learnings after each phase
-
-## Section Ownership Legend
-
-| Tag | Meaning |
-|-----|---------|
-| `[FIXED]` | Core orchestration — do not modify without full re-evaluation |
-| `[OPTIMIZABLE]` | Patterns that may evolve based on learnings |
-
-| Section | Tag |
-|---------|-----|
-| Orchestration Philosophy | FIXED |
-| Document Ownership | FIXED |
-| Orchestrator Tools | FIXED |
-| Trust Boundaries | OPTIMIZABLE |
-| Agent Dispatch Instructions | FIXED |
-| Two-Phase Dispatch Pattern | FIXED |
-| Research Output Schema | OPTIMIZABLE |
-| Agent Instruction Template | FIXED |
-| Task State Transitions | FIXED |
-| Verification-First Pattern | FIXED |
-| Agent Contract | OPTIMIZABLE |
-| Checkpoint Pattern | OPTIMIZABLE |
-| Commit Hygiene | FIXED |
-| Code Documentation Standards | FIXED |
-| What Works vs What Doesn't | OPTIMIZABLE |
-| Failure-Driven Research | FIXED |
-| Success Criteria | FIXED |
-| Workspace | FIXED |
-| Key Project Decisions | FIXED |
-| Section Ownership Legend | FIXED |
+- PROGRESS.md is updated on each task completion
+- TASKS.md is emptied on task completion
