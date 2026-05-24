@@ -1,40 +1,112 @@
 {
-  "version": 1,
-
-  "_persistentBaseState": {
-    "description": "PERSISTENT BASE STATE — Do Not Remove. This defines the orchestrator task tracking structure. Full reference in PLAN.md Template section.",
+  "_persistentState": {
+    "description": "PERSISTENT EXECUTION LEDGER — (TEMPLATE) Do Not Remove. Defines the structure for decomposing PLAN.md phases into actionable tasks. Sequential Two-Phase Dispatch (Research -> Implement) is handled at the Phase level.",
     "structure": {
-      "activePhase": "Current phase name (e.g., 'Phase 1: Research') - empty when directive complete",
+      "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md (e.g., Phase-1-Authentication)",
+      "phaseDescription": "The high-level goal, boundaries, and context of this phase as defined by the Architect",
+      "state": "pending | researching | spec_ready | implementing | completed | blocked",
       "tasks": {
         "_taskId": {
-          "id": "Descriptive hyphenated ID (e.g., Phase-1-Task-1)",
-          "phase": "Phase X: [Name]",
-          "description": "What needs to be accomplished",
-          "files": ["path/to/file1", "path/to/file2"],
-          "successCriteria": ["Specific measurable criterion 1", "Specific measurable criterion 2"],
-          "state": "pending | in_progress | completed | blocked",
-          "agent": "Explore | general-purpose | claude",
-          "research": {
-            "summary": "High-level approach recommendation",
-            "decisions": ["Decision 1", "Decision 2"],
-            "context": {
-              "fileStructure": "Specific file paths and purposes",
-              "apiPattern": "Specific function signatures, class names, method names",
-              "dataFlow": "How components connect and pass data",
-              "gotchas": ["Common mistakes or edge cases to avoid"]
-            },
-            "verification": ["Specific things to verify in implementation"]
+          "id": "Descriptive task ID matching phase hierarchy (e.g., Phase-1-Task-1-DB-Schema)",
+          "description": "Granular action item required to achieve the active phase goal",
+          "targetFiles": ["Array of file paths relevant to this specific task"],
+          "successCriteria": [
+            "Specific, measurable technical constraint for this task"
+          ],
+          "dispatches": {
+            "researchAgent": "Explore | general-purpose (Records agent type used for Phase A)",
+            "implementAgent": "general-purpose (Records agent type used for Phase B)"
           },
-          "progressEntry": "Brief summary for PROGRESS.md: what was done, why, key decision made",
-          "blockerReason": "If state is blocked — why it failed",
-          "researchNeeded": "If blocked — what needs investigation"
+          "phaseA_Research": {
+            "instruction": "MANDATORY STEP 1: Dispatch Explore agent to research HOW to implement this specific task.",
+            "summary": "High-level approach and structural recommendations returned by the Agent",
+            "decisions": ["Architectural options weighed and recommended by the Agent"],
+            "context": {
+              "fileStructure": "Specific file paths and purposes discovered during research",
+              "apiPattern": "Specific function signatures, class names, or method names to adhere to",
+              "dataFlow": "How components will connect, pass data, or trigger events",
+              "gotchas": ["Edge cases, common mistakes, or framework limitations to avoid"]
+            }
+          },
+          "phaseB_ImplementationSpec": {
+            "instruction": "MANDATORY STEP 2: Populated by the Orchestrator ONLY after synthesizing Phase A research. Guides the implementation agent.",
+            "instructions": "Granular, step-by-step technical implementation instructions derived from research synthesis",
+            "specificFilesToModify": ["Refined list of exact file paths to be edited based on research findings"],
+            "verificationChecklist": ["Concrete checklist items the Orchestrator will verify post-execution"]
+          },
+          "blockerLog": {
+            "reason": "If phase state is blocked — detailed summary of why this task failed or hit an error",
+            "researchNeeded": "If blocked — explicit directive specifying what the next research dispatch must investigate before retry"
+          }
         }
+      },
+      "phaseSuccessCriteria": [
+        "Architect-defined measurable outcome",
+        "Orchestrator-defined measurable outcome"
+      ],
+      "progressEntry": {
+        "instruction": "Populated by the Orchestrator immediately after task verification to stage data for PROGRESS.md and git commits.",
+        "timestamp": "ISO-8601 string of completion",
+        "summary": "Concise summary focusing on the 'why' and technical evolution of this phase",
+        "keyTechnicalDecisions": ["List of non-obvious design choices or structural trade-offs made"],
+        "filesChanged": ["Array of paths actually modified, verified via post-agent file reads"],
+        "frameworkCheckpointCommit": "Suggested commit message formatting (e.g., 'feat: checkpoint loop N')"
       }
-    },
-    "clearingRules": "Cleared when: directive_complete OR phase_complete OR explicit architect direction. Blocked tasks remain until resolved."
+    }
   },
-
-  "activePhase": "",
-
-  "tasks": {}
+  "activeState": {
+    "description": "MODIFYABLE EXECUTION LEDGER — Defines the structure for decomposing PLAN.md phases into actionable tasks. Sequential Two-Phase Dispatch (Research -> Implement) is handled at the Phase level.",
+    "structure": {
+      "phaseId": "",
+      "phaseDescription": "",
+      "state": "",
+      "tasks": {
+        "_taskId": {
+          "id": "",
+          "description": "",
+          "targetFiles": [""],
+          "successCriteria": [
+            ""
+          ],
+          "dispatches": {
+            "researchAgent": "",
+            "implementAgent": ""
+          },
+          "phaseA_Research": {
+            "instruction": "",
+            "summary": "",
+            "decisions": [""],
+            "context": {
+              "fileStructure": "",
+              "apiPattern": "",
+              "dataFlow": "",
+              "gotchas": [""]
+            }
+          },
+          "phaseB_ImplementationSpec": {
+            "instruction": "",
+            "instructions": "",
+            "specificFilesToModify": [""],
+            "verificationChecklist": [""]
+          },
+          "blockerLog": {
+            "reason": "",
+            "researchNeeded": ""
+          }
+        }
+      },
+      "phaseSuccessCriteria": [
+        "",
+        ""
+      ],
+      "progressEntry": {
+        "instruction": "",
+        "timestamp": "",
+        "summary": "",
+        "keyTechnicalDecisions": [""],
+        "filesChanged": [""],
+        "frameworkCheckpointCommit": ""
+      }
+    }
+  }
 }
