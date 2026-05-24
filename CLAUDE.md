@@ -242,7 +242,7 @@ If verification fails: mark task blocked with `blockerReason`, specify what's wr
 
 ### Context Management
 
-- If agent output exceeds 2000 tokens → agent must summarize before returning
+- If agent output exceeds `AGENT_OUTPUT_TOKEN_LIMIT` (4000 tokens) → agent must summarize before returning
 - Orchestrator trims context snapshots when >10 items accumulated
 - On context limit: agent checkpoints to .tasks.json, reports BLOCKED
 - Agents self-diagnose: tokens remaining vs. task needs. If insufficient, checkpoint and report BLOCKED — never silently drop context

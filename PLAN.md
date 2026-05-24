@@ -1,38 +1,20 @@
 # PLAN.md — Strategic Architecture & Shared Mental Model
+## BASE TEMPLATE — DO NOT REMOVE OR MODIFY FRAMEWORK SECTIONS
 
-PLAN.md is the architectural firewall between the Human Architect and the AI Orchestrator. It serves as the Shared Mental Model: translating abstract directives into hard architectural boundaries, surfacing high-level options from research, and requiring explicit Architect sign-off before any implementation task is written to .tasks.json.
+PLAN.md is the orchestrator's living document — in service of the architect's directive built in collaboration with the architect. It is the **Shared Mental Model** and architectural firewall between the Human Architect and the AI Orchestrator. It serves three roles:
+- **Strategic Intent Mapping:** Translating the architect's raw directive into hard architectural boundaries (Scope, Phase sequences, Key Decisions).
+- **High-Level Agentic Research:** The Orchestrator dispatches research agents to probe the codebase and surface trade-offs. Findings (options, pros/cons, recommendations) are written into PLAN.md for human review.
+- **The Pause & Confirm Gate:** The Orchestrator **cannot** decompose a phase into .tasks.json implementation tasks until the Architect has approved the architectural options recorded in PLAN.md. This is a hard gate — skipping it means building on guesswork.
+
+---
 
 ## Active Directives
 
-### Directive:
-
-**Architect Intent:** [What the architect wants to achieve]
-
-**Scope:**
-- In scope: [What is included]
-- Out of scope: [What is excluded]
-
-**Phase Sequence:**
-1. Phase 1: [Name] — [pending]
-2. Phase 2: [Name] — [pending]
-
-**Key Decisions:**
-- Decision: [Option A] vs [Option B] → [Resolution]
-
-**Risks:**
-- Risk: [Description] — [Mitigation]
+*[Future directives will be recorded here]*
 
 ---
 
-### Phase X: [Phase Name]
-
-- **Architectural Options Considered:**
-  - *Option A:* [Technical approach, pros, cons]
-  - *Option B:* [Technical approach, pros, cons]
-- **Orchestrator Recommendation:** [Rationale based on constraints]
-- **Architect Alignment Gate:** [PENDING | APPROVED by User]
-
+## FRAMEWORK BOUNDARY MARKER
+### Below this line = project-specific runtime content (reset on directive completion)
+### Above this line = immutable base template (never modified by orchestrator)
 ---
-
-**Progress Reference:**
-See .tasks.json for active task state, progress entries, and completion logs.

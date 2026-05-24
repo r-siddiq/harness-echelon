@@ -1,14 +1,27 @@
 {
+  "_comment": "BASE TEMPLATE — Do not remove or modify framework schema sections. Runtime state (below) resets to defaults on directive completion.",
+
   "_persistentState": {
-    "description": "PERSISTENT EXECUTION LEDGER — (TEMPLATE) Do Not Remove. Defines the structure for decomposing PLAN.md phases into actionable tasks. Sequential Two-Phase Dispatch (Research -> Implement) is handled at the Phase level.",
+    "description": "PERSISTENT EXECUTION LEDGER — Schema reference for task decomposition. Two-Phase Dispatch (Research -> Implement) handled at Phase level. This template is immutable — it defines the contract, not the work.",
     "structure": {
-      "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md (e.g., Phase-1-Authentication)",
+      "schemaVersion": "1.0",
+      "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md",
       "phaseDescription": "The high-level goal, boundaries, and context of this phase as defined by the Architect",
       "state": "pending | researching | spec_ready | implementing | completed | blocked",
       "tasks": {
         "_taskId": {
-          "id": "Descriptive task ID matching phase hierarchy (e.g., Phase-1-Task-1-DB-Schema)",
+          "id": "Descriptive task ID matching phase hierarchy",
           "description": "Granular action item required to achieve the active phase goal",
+          "state": "pending | researching | spec_ready | implementing | completed | blocked",
+          "retryCounter": 0,
+          "maxRetryLimit": 3,
+          "turnSelfAssessment": {
+            "ruleAdherence": null,
+            "contextSanitation": null,
+            "frictionTrace": ""
+          },
+          "dependsOn": [],
+          "conflictsWith": [],
           "targetFiles": [],
           "successCriteria": [],
           "dispatches": {
@@ -32,6 +45,8 @@
       "progressEntries": []
     }
   },
+
+  "schemaVersion": "1.0",
   "phaseId": "",
   "phaseDescription": "",
   "state": "pending",
