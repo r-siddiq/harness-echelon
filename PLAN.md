@@ -1,11 +1,10 @@
-# PLAN.md — Architect Directive Mapping
+# PLAN.md — Strategic Architecture & Shared Mental Model
 
-## Template (Do Not Remove)
+PLAN.md is the architectural firewall between the Human Architect and the AI Orchestrator. It serves as the Shared Mental Model: translating abstract directives into hard architectural boundaries, surfacing high-level options from research, and requiring explicit Architect sign-off before any implementation task is written to .tasks.json.
 
-```markdown
 ## Active Directives
 
-## Directive: [Directive Name]
+### Directive:
 
 **Architect Intent:** [What the architect wants to achieve]
 
@@ -14,28 +13,26 @@
 - Out of scope: [What is excluded]
 
 **Phase Sequence:**
-1. Phase 1: [Name] — [Brief description]
-[...]
+1. Phase 1: [Name] — [pending]
+2. Phase 2: [Name] — [pending]
 
 **Key Decisions:**
 - Decision: [Option A] vs [Option B] → [Resolution]
-[...]
 
 **Risks:**
 - Risk: [Description] — [Mitigation]
-[...]
-
-**Task Mapping:**
-- Phase X tasks → [What happens in this phase]
-[...]
-
-**Progress Reference:**
-See .tasks.json for active task state. See PROGRESS.md for completion log with timestamps and decisions.
-```
 
 ---
 
-## Active Directives (Modifiable)
+### Phase X: [Phase Name]
 
-### Directive:
+- **Architectural Options Considered:**
+  - *Option A:* [Technical approach, pros, cons]
+  - *Option B:* [Technical approach, pros, cons]
+- **Orchestrator Recommendation:** [Rationale based on constraints]
+- **Architect Alignment Gate:** [PENDING | APPROVED by User]
 
+---
+
+**Progress Reference:**
+See .tasks.json for active task state, progress entries, and completion logs.
