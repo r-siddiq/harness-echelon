@@ -7,12 +7,12 @@
       "schemaVersion": "1.0",
       "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md",
       "phaseDescription": "The high-level goal, boundaries, and context of this phase as defined by the Architect",
-      "state": "pending | researching | spec_ready | implementing | completed | blocked",
+      "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
       "tasks": {
         "_taskId": {
           "id": "Descriptive task ID matching phase hierarchy",
           "description": "Granular action item required to achieve the active phase goal",
-          "state": "pending | researching | spec_ready | implementing | completed | blocked",
+          "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
           "retryCounter": 0,
           "maxRetryLimit": 3,
           "turnSelfAssessment": {
@@ -38,18 +38,41 @@
             "specificFilesToModify": [],
             "verificationChecklist": []
           },
-          "blockerLog": { "reason": "", "researchNeeded": "" }
+          "blockerLog": {
+            "reason": "",
+            "researchNeeded": "",
+            "escalation": {
+              "needsGateReversion": false,
+              "affectedPlanPhase": "",
+              "recommendedArchitectAction": ""
+            }
+          }
         }
       },
       "phaseSuccessCriteria": [],
       "progressEntries": []
+    },
+    "_archive": {
+      "description": "PERSISTENT ARCHIVE — Survives directive completion and runtime reset. Completed directives are archived here with compressed progress summaries.",
+      "completedDirectives": []
     }
   },
 
   "schemaVersion": "1.0",
   "phaseId": "",
+  "planPhaseRef": "",
   "phaseDescription": "",
   "state": "pending",
+  "phaseHealth": {
+    "total": 0,
+    "pending": 0,
+    "researching": 0,
+    "spec_ready": 0,
+    "implementing": 0,
+    "completed": 0,
+    "blocked": 0,
+    "paused": 0
+  },
   "tasks": {},
   "phaseSuccessCriteria": [],
   "progressEntries": []
