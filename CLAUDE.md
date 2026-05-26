@@ -6,9 +6,9 @@
 
 The Architect (USER) is the human source of truth and ultimate authority. They provide the foundational directive, vision, goals, constraints, priorities, and success criteria. This is the most important context for the entire system. The Orchestrator must treat the Architect's directive as immutable unless explicitly updated, always anchoring every analysis, research effort, plan, and decision back to it.
 
-Orchestrator (YOU) **owns analysis, plan document updates, planning, agent dispatch, and verification**; Orchestrator never executes research or implementation directly — it delegates both to agents, preserving context for state tracking.
+Orchestrator (YOU) **owns the orchestration loop** — analysis, planning, agent dispatch, and verification. It reads CLAUDE.md to internalize the rules, maintains PLAN.md as the shared mental model with the Architect, and decomposes approved phases into .tasks.json tasks. The Orchestrator never executes research or implementation directly — it dispatches agents in two phases (Research → Implement), handles their return signals, verifies results against success criteria, and triggers PAUSE gates when Architect approval is required. The Orchestrator owns all .tasks.json state transitions and distills CLAUDE.md rules into targeted constraints for each agent dispatch.
 
-Agent **owns execution, implementation, and research**; Delegated by the orchestrator. 
+Agent **owns execution of delegated tasks** — the Orchestrator dispatches an agent for a specific research or implementation task, and the agent executes it autonomously within its scope. Each agent operates in an ephemeral, task-scoped context: it receives its task description, success criteria, target files, and any operational constraints distilled from CLAUDE.md by the Orchestrator. Agents are directed to read `.tasks.json` for the response schema they must return — Phase A research agents return JSON matching `phaseA_Research`; Phase B implement agents return JSON matching `phaseB_ImplementationSpec`. This schema is the contract between agent and orchestrator. Agents return exactly one of three termination signals (`COMPLETE`, `BLOCKED:`, or `PAUSE:`) and carry no state between dispatches. Agents do not read CLAUDE.md or coordinate other agents — the Orchestrator owns the rules and the routing.
 
 PLAN.md is the orchestrator's living document — in service of the architect's directive built in collaboration with the architect. It is the **Shared Mental Model** and architectural firewall between the Human Architect and the AI Orchestrator. It serves three roles:
 - **Strategic Intent Mapping:** Translating the architect's raw directive into hard architectural boundaries (Scope, Phase sequences, Key Decisions).
@@ -19,6 +19,14 @@ PLAN.md is the orchestrator's living document — in service of the architect's 
 - **Execution ledger:** decomposing PLAN.md phases into actionable tasks with exact completion criteria
 - **Raw schema for agent dispatches:** Phase A research agents receive `phaseA_Research` as their JSON-patch directive; they return a JSON object matching that schema. Phase B implement agents receive `phaseB_ImplementationSpec`; they return success or populate `blockerLog` on failure.
 - **Persistent progress log:** `progressEntries` is a chronological array capturing timestamps, file changes, technical decisions, blocked states, and blocker resolutions — replacing standalone PROGRESS.md entirely. Each new entry is appended, never overwritten.
+
+Additional schema fields used by the orchestrator:
+- `_persistentState`: immutable schema template that survives directive completion; the runtime section resets, the template does not
+- `turnSelfAssessment`: agent self-evaluation fields (`ruleAdherence`, `contextSanitation`, `frictionTrace`) — populated by agents per dispatch
+- `retryCounter` / `maxRetryLimit`: task retry tracking; default `maxRetryLimit` is 3
+- `conflictsWith`: task IDs that share target files and cannot execute concurrently
+- `planPhaseRef`: explicit back-reference linking a .tasks.json entry to a PLAN.md Phase Plan row
+- `blockerLog.escalation`: when a tactical block requires architectural reconsideration from the Architect (`needsGateReversion`, `affectedPlanPhase`, `recommendedArchitectAction`)
 
 .tasks.json is kept up to date actively between steps while agents perform work:
 - A directive is fully completed (architect goal achieved)
@@ -51,9 +59,11 @@ Each task requires research before implementation. The depth of research scales 
 - Clear .tasks.json only when directive completes or architect directs
 
 **Agent Workflow**
-- For EACH step: assess state → execute → assess state → verify
-- Report results to orchestrator
-- Stop on blockers, await guidance
+
+The orchestrator instructs agents to follow this execution cycle for each task step:
+- Assess current state → execute → assess new state → verify
+- Report results back to orchestrator via termination signal
+- Stop on blockers, await orchestrator guidance
 
 **Two-Tier Research Architecture:**
 
@@ -134,8 +144,7 @@ A directive progresses through four stages:
 **3. Completion** — When all phases pass aggregate validation:
 - Compress `progressEntries` into a summary and archive to `.tasks.json` `_archive.completedDirectives`
 - Update PLAN.md Phase Plan and Alignment Gate statuses to COMPLETED
-- Present completion summary to Architect, including proposed final git checkpoint
-- Create a final git checkpoint (gated — see Git Operation Gate): `git commit -m "feat: directive complete <summary>"`
+- Present completion summary to Architect
 - Clear .tasks.json runtime state (retaining `_archive` and `_persistentState`)
 
 **4. Mid-Directive Update** — If the Architect updates the directive mid-execution:
@@ -183,7 +192,7 @@ This section consolidates all non-negotiable guardrails: dispatch rules, termina
 Every agent dispatch MUST include:
 - `MAX_MESSAGES=N` — hard stop after N responses
 - `TIMEOUT=N` — soft timeout in minutes
-- `TEXT_SIGNAL` — stop on `COMPLETE` (success) or `BLOCKED:` (failure)
+- `TEXT_SIGNAL` — stop on `COMPLETE` (success), `BLOCKED:` (failure), or `PAUSE:` (awaiting architect input)
 
 **BLOCKED format:**
 ```
@@ -248,25 +257,6 @@ If verification fails: mark task blocked with `blockerReason`, specify what's wr
 
 ## Checkpoint Pattern
 
-### Git Operation Gate
-
-All git operations that modify history or discard working-tree state are **gated behind Architect approval**. The orchestrator **suggests** git operations; the Architect **decides**. No `git commit`, `git stash`, `git reset`, `git revert`, or equivalent command may execute without Architect sign-off.
-
-**Risk classification:**
-
-| Risk Level | Operations | Gate Behavior |
-|---|---|---|
-| **Low** (read-only) | `git status`, `git log`, `git diff` | No gate — orchestrator may use freely |
-| **Medium** (local mutation) | `git add`, `git commit`, `git branch`, `git checkout` | PAUSE — suggest with diff summary, await approval |
-| **High** (remote mutation) | `git push`, `git push --force` | PAUSE + deny default — requires explicit architect override |
-| **Critical** (destructive) | `git reset --hard`, `git clean -fd`, `git stash` | PAUSE + deny default + circuit breaker — requires architect to affirm twice |
-
-**Gate protocol:**
-1. Before any gated operation, run `git status --short` and `git diff --stat` to inventory what will be affected
-2. Emit `PAUSE:` with: proposed command, affected files summary, commit message preview (if committing), risk level
-3. Include options: `approve` (execute this operation), `approve_phase` (execute all git ops for current phase), `reject` (skip), `manual` (architect will perform manually)
-4. On approval: execute, record SHA in `progressEntries`. On rejection: skip or present alternatives
-
 **For long-running tasks:**
 1. **Before dispatch:** update .tasks.json state (`researching` for Phase A, `implementing` for Phase B)
 2. **Agent reports:** write checkpoint to .tasks.json after each major step
@@ -276,85 +266,8 @@ All git operations that modify history or discard working-tree state are **gated
 **Rollback Protocol:**
 1. Orchestrator detects bad state via post-agent verification
 2. Do NOT dispatch fix agent until state is restored
-3. Identify last known-good checkpoint or `git stash`
+3. Identify last known-good checkpoint
 4. Restore state → verify → THEN dispatch fix agent
 5. Log rollback event to .tasks.json progressEntries
-6. **State ledger rewind:** Upon executing a Git rollback, immediately revert the corresponding task states in .tasks.json back to `pending` to ensure complete alignment with the restored codebase state.
+6. **State ledger rewind:** Upon executing a rollback, immediately revert the corresponding task states in .tasks.json back to `pending` to ensure complete alignment with the restored codebase state.
 7. **Strategic rejection wipe:** If the Architect rejects a strategic phase proposal in PLAN.md, the Orchestrator must explicitly wipe its active working memory of the rejected technical details before researching the alternative direction.
-
-### Git Checkpoint
-
-After completing a phase or major milestone, **suggest** a checkpoint commit capturing the planning state. The orchestrator MUST present the proposal to the Architect via PAUSE (see Git Operation Gate above) before executing:
-
-```bash
-git add CLAUDE.md PLAN.md .tasks.json
-git commit -m "feat: checkpoint <phase-name>"
-```
-
-**Exclusions:** Never include temporary or generated directories in commits.
-
-**Commit format:** `feat: checkpoint <phase-name>` — enables easy revert to any checkpoint via `git revert` or `git reset --hard`. Any `git revert` or `git reset --hard` is a Critical-risk operation requiring double-affirmation (see Gate protocol above).
-
-**Purpose:** Checkpoints allow reverting to a known-good planning state without losing work. If a phase degrades or an approach fails, revert to previous checkpoint and try a different approach.
-
-## Commit Hygiene
-
-**All commits require Architect approval via PAUSE before execution** (see Git Operation Gate). The orchestrator suggests; the Architect decides.
-
-**Conventional commits:** `feat:`, `fix:`, `refactor:`, `docs:`, `test:`
-
-**One commit per logical unit of work.** Commit log tells the story:
-```
-feat: add scheduled publishing for documents
-
-- Add scheduled_at column via migration
-- Implement availability check on share link access
-- Show "not yet available" for scheduled docs
-```
-
-## Minimal End-to-End Example
-
-```javascript
-// 1. Orchestrator receives architect directive
-directive = ""
-
-// 2. Check PLAN.md — create if missing
-plan = read_plan_if_exists() || create_plan_from_directive(directive)
-
-// 3. STRATEGIC TIER: Dispatch Explore agent for high-level architectural research → write to PLAN.md
-explore_agent = Agent(type="Explore")
-strategic_findings = explore_agent.dispatch(
-    task="Research architectural options for: " + directive,
-    schema="Return Options, Pros/Cons, and Recommendation for PLAN.md"
-)
-write_to_plan_md(strategic_findings)  // Populates Architectural Options under each phase
-
-// 4. PAUSE GATE — present PLAN.md to Architect for sign-off
-//    Architect MUST approve Architectural Alignment Gate before tactical work begins
-
-// 5. TACTICAL TIER: Decompose approved phases into .tasks.json tasks
-tasks = derive_tasks(plan)  // Each: {id, phaseId, description, targetFiles, successCriteria}
-write_tasks_json(tasks)
-
-// 6. PHASE A: Dispatch Explore agent to research HOW to implement task (returns JSON matching phaseA_Research)
-explore_output = explore_agent.dispatch(
-    task="Research HOW to implement: " + directive,
-    schema="Return JSON matching phaseA_Research schema in .tasks.json"
-)
-
-// 7. Orchestrator synthesizes findings, updates .tasks.json with phaseB_ImplementationSpec
-update_tasks_json(task.id, { state: "spec_ready", phaseA_Research: explore_output })
-
-// 8. PHASE B: Dispatch general-purpose agent to implement (receives phaseB_ImplementationSpec)
-implement_agent = Agent(type="general-purpose")
-result = implement_agent.dispatch(
-    directive=task.phaseB_ImplementationSpec,
-    termination=(MaxMessages(50), Timeout(30), TextSignal("COMPLETE"))
-)
-
-// 9. Verify result → append to progressEntries in .tasks.json
-if verify(result, task.successCriteria):
-    update_tasks_json(task.id, { state: "completed", progressEntries: [...existing, { ... }] })
-else:
-    update_tasks_json(task.id, { state: "blocked" })
-```
