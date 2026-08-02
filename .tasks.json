@@ -25,8 +25,8 @@
           "targetFiles": [],
           "successCriteria": [],
           "dispatches": {
-            "researchAgent": "Explore | general-purpose | claude",
-            "implementAgent": "general-purpose | claude"
+            "researchAgent": "Explore | general-purpose",
+            "implementAgent": "general-purpose"
           },
           "phaseA_Research": {
             "summary": "",
@@ -53,7 +53,7 @@
       "progressEntries": []
     },
     "_archive": {
-      "description": "PERSISTENT ARCHIVE — Survives directive completion and runtime reset. Completed directives are archived here with compressed progress summaries.",
+      "description": "PERSISTENT ARCHIVE — Survives directive completion and runtime reset. Schema-compatible legacy section; runtime completion history is preserved in root log.md, not here.",
       "completedDirectives": []
     }
   },
