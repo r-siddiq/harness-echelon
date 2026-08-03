@@ -46,7 +46,7 @@
 
 ## Architect Alignment Gates
 
-*[Per-phase approval tracker. The orchestrator MUST NOT proceed to tactical decomposition (.tasks.json) for any phase until its gate is APPROVED. Approval is bound to the reviewed plan content hash; a later architecture change returns only the affected gates to PENDING before decomposition or implementation. If a tactical block requires altering the high-level architecture, the affected gate reverts to PENDING and a strategic PAUSE is triggered.]*
+*[Per-phase approval tracker. The orchestrator MUST NOT proceed to tactical decomposition (.tasks.json) for any phase until its gate is APPROVED. Approval is bound to the reviewed plan content; a later architecture change returns only the affected gates to PENDING before decomposition or implementation. If a tactical block requires altering the high-level architecture, the affected gate reverts to PENDING and a strategic PAUSE is triggered.]*
 
 | Phase | Status | Approval subject | Recorded |
 |-------|--------|------------------|----------|

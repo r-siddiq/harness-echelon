@@ -1,6 +1,6 @@
-# Outer Framework Closed-Task History
+# Closed-Task History
 
-This root log preserves closed-task history for the outer orchestration framework. Each section contains the completed task's full JSON object and only the chronological `progressEntries` whose `taskId` exactly matches that task.
+This root log preserves closed-task history. Each section contains the completed task's full JSON object and only the chronological `progressEntries` whose `taskId` exactly matches that task.
 
 After orchestrator verification, archive the completed task's full JSON object and its exact matching task-specific progress here, then remove those records from `.tasks.json` and recompute `phaseHealth`. Blocked, paused, and all other non-completed work stays active in `.tasks.json`.
 
@@ -38,6 +38,11 @@ After orchestrator verification, archive the completed task's full JSON object a
       "dataFlow": "",
       "gotchas": []
     }
+  },
+  "researchBasis": {
+    "sourceFiles": [],
+    "upstreamAssumptions": [],
+    "status": "current"
   },
   "phaseB_ImplementationSpec": {
     "instructions": "",

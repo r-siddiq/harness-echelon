@@ -33,6 +33,11 @@
             "decisions": [],
             "context": { "fileStructure": "", "apiPattern": "", "dataFlow": "", "gotchas": [] }
           },
+          "researchBasis": {
+            "sourceFiles": [],
+            "upstreamAssumptions": [],
+            "status": "provisional | current | stale"
+          },
           "phaseB_ImplementationSpec": {
             "instructions": "",
             "specificFilesToModify": [],
@@ -50,7 +55,10 @@
         }
       },
       "phaseSuccessCriteria": [],
-      "progressEntries": []
+      "progressEntries": [],
+      "lookaheadPhases": {
+        "description": "Active research/spec state for Architect-approved downstream phases, researched ahead while the current phase implements. Each entry mirrors the root phase shape (phaseId, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries). Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Entries are active non-completed records, not history."
+      }
     },
     "_archive": {
       "description": "PERSISTENT ARCHIVE — Survives directive completion and runtime reset. Schema-compatible legacy section; runtime completion history is preserved in root log.md, not here.",
@@ -75,5 +83,6 @@
   },
   "tasks": {},
   "phaseSuccessCriteria": [],
-  "progressEntries": []
+  "progressEntries": [],
+  "lookaheadPhases": []
 }
