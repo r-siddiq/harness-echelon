@@ -32,6 +32,7 @@ Additional schema fields used by the orchestrator:
 - `researchBasis`: per-researched-task object with `sourceFiles` (the materially relied-on files, by path), `upstreamAssumptions` (contracts the research assumed hold), and `status` (`provisional` for lookahead, `current` after a re-read/diff confirms no relevant change, `stale` on detected drift). Revalidated immediately before Phase B by re-reading or diffing the recorded files; unchanged work dispatches directly, drift receives bounded delta research
 - `lookaheadPhases`: array of downstream Architect-approved phases held as active research/spec state, each with its own tasks, `phaseHealth`, success criteria, and task-scoped progress. Phase B never runs here until the phase is promoted to the root active phase
 - `blockerLog.escalation`: when a tactical block requires architectural reconsideration from the Architect (`needsGateReversion`, `affectedPlanPhase`, `recommendedArchitectAction`)
+- `activeAgents`: live registry of currently-open agent handles. Each entry records the agent id/name, the taskId it serves, phase (root or lookahead id), state (`researching` / `implementing`), dispatch timestamp, and a terminal-pending flag. Add an entry on dispatch; remove it on retire. This is the Orchestrator's source of truth for true concurrency consumption and **must be consulted before any new dispatch** — it is what prevents completed-but-unclosed handles from silently consuming slots.
 
 .tasks.json is kept up to date actively between steps while agents perform work:
 - A directive is fully completed (architect goal achieved)
@@ -54,7 +55,7 @@ Each task requires research before implementation. The depth of research scales 
 - Fill all available Explore slots, up to `MAX_PARALLEL_EXPLORE`, with bounded task-scoped research. Do not wait for one task's implementation before researching downstream tasks whose questions can be answered from the current baseline.
 - Read-only Phase A agents may inspect overlapping source files and may research tasks with future implementation dependencies. Their only output is returned research, so future `targetFiles` overlap is not an edit conflict.
 - Each Phase A result records the materially relied-on source files (by path) plus any assumptions about upstream contracts. The Orchestrator synthesizes each returned result into that task's `phaseB_ImplementationSpec` and marks it `spec_ready`, while `dependsOn` still gates implementation.
-- Backfill an Explore slot as soon as a research agent returns. Process results independently; do not hold completed research merely to wait for the rest of a wave.
+- Retire the returning agent and backfill its Explore slot as soon as it returns. Process results independently; do not hold completed research merely to wait for the rest of a wave.
 - Immediately before Phase B, re-read or diff the recorded source files and check the upstream interface assumptions against current files. If nothing relevant changed, dispatch implementation directly. If an upstream implementation changed the required contract, dispatch only a bounded delta-research check for that drift instead of repeating full research.
 - Phase B remains dependency- and write-conflict-aware. Parallel research is an optimization; it never authorizes concurrent overlapping edits.
 
@@ -70,12 +71,12 @@ Each task requires research before implementation. The depth of research scales 
 
 **Pipelined scheduler (default during tactical execution):**
 - Maintain three independent lanes: up to four read-only Explore agents, exactly one Phase B product-code writer, and the Orchestrator's control lane for `.tasks.json`, root `log.md`, dispatch, and verification.
-- A returned Phase A result is useful immediately. Validate it, populate that task's `phaseA_Research`, synthesize `phaseB_ImplementationSpec`, mark the task `spec_ready`, and backfill the freed Explore slot without waiting for the rest of the research wave.
+- A returned Phase A result is useful immediately. Validate it, populate that task's `phaseA_Research`, synthesize `phaseB_ImplementationSpec`, mark the task `spec_ready`, retire the returning agent, and backfill the freed Explore slot without waiting for the rest of the research wave.
 - Start the earliest eligible Phase B task as soon as its spec and implementation dependencies are ready. Remaining Explore agents continue researching downstream tasks while the single writer runs.
 - While the writer runs, the Orchestrator does not idle if safe control-lane work exists. In priority order: record blockers and queue bounded blocker research for the next available Explore slot; process returned research; backfill Explore slots from current critical-path work and then approved lookahead phases; archive verified completed tasks and remove their scoped progress from `.tasks.json`; recompute root/lookahead `phaseHealth` and sanitize stale active-ledger context; prepare non-overlapping verification inputs. Wait only when none of these are available.
 - If all approved phases are fully researched, no future phase is approved yet, and no control-lane work remains, idle Explore slots simply stay empty until the next phase promotion or Architect approval — do not manufacture speculative research into unapproved phases.
 - Product-code agents never write `.tasks.json` or root `log.md`, and the Orchestrator never touches the active writer's product-file write set. This keeps control-lane maintenance safe while implementation runs.
-- On Phase B `COMPLETE`, the implementation agent must already be terminal before any successor writer starts. Perform focused independent verification sufficient to protect the next task, then make these as one batched state transition before yielding to the successor writer — mark the prior task `completed` and the successor `implementing`, append the minimal handoff events, and dispatch the successor immediately. "Batched" here means consecutive tool calls with no intervening agent dispatch, not a filesystem transaction. Archive and remove the prior completed task while the successor runs; do not leave the implementation lane empty merely to perform archival housekeeping.
+- On Phase B `COMPLETE`, the implementation agent must already be terminal before any successor writer starts. Perform focused independent verification sufficient to protect the next task, then make these as one batched state transition before yielding to the successor writer — retire the prior implementation agent's handle, mark the prior task `completed` and the successor `implementing`, append the minimal handoff events, and dispatch the successor immediately. "Batched" here means consecutive tool calls with no intervening agent dispatch, not a filesystem transaction. Archive and remove the prior completed task while the successor runs; do not leave the implementation lane empty merely to perform archival housekeeping.
 - Never dispatch a successor from unverified output. If verification fails or the agent returns `BLOCKED:`, keep dependent implementation stopped, record the blocker, and immediately use an available Explore slot for bounded blocker research. An independent eligible implementation may use the single writer lane only when its dependencies and write/contract boundaries are demonstrably clear.
 - A verified `completed` task may remain briefly in `.tasks.json` only across this immediate writer handoff. Archival is the first safe control-lane housekeeping action afterward; stale completions must not accumulate or be passed to delegated agents.
 
@@ -87,7 +88,7 @@ Each task requires research before implementation. The depth of research scales 
 - **Trigger PAUSE** — present PLAN.md options to Architect for sign-off. Do NOT proceed to task decomposition until the Architect Alignment Gate is APPROVED.
 - **Tactical tier (after approval):** Decompose approved phases into .tasks.json tasks with exact file targets and success criteria
 - Dispatch Phase A research as a rolling fan-out of up to four bounded Explore agents → each returns JSON matching its task's `phaseA_Research`
-- As each result returns, verify and synthesize it immediately → populate that task's `phaseB_ImplementationSpec` → mark it `spec_ready` → backfill the open Explore slot with the next downstream research task
+- As each result returns, verify and synthesize it immediately → populate that task's `phaseB_ImplementationSpec` → mark it `spec_ready` → retire the returning agent and backfill the freed Explore slot with the next downstream research task
 - Dispatch Phase B for the earliest `spec_ready` task whose `dependsOn` and write/contract boundaries are clear; exactly one product-code implementation agent runs at a time
 - While a Phase B agent runs, continue receiving and synthesizing downstream read-only research without duplicating implementation work or touching the implementation agent's write set
 - For an active implementation agent, wait until `COMPLETE`, `BLOCKED:`, or `PAUSE:`; advisory probes never terminate useful work
@@ -147,7 +148,7 @@ Every agent dispatch terminates with one of three text signals. The orchestrator
 
 | Signal | State Transition | Orchestrator Action |
 |--------|-----------------|---------------------|
-| `COMPLETE` | → `completed` (Phase B) or → `spec_ready` (Phase A) | Phase A: synthesize immediately and backfill its Explore slot. Phase B: independently verify, hand the single writer lane to the next eligible task, then archive/remove the prior completion while that writer runs. |
+| `COMPLETE` | → `completed` (Phase B) or → `spec_ready` (Phase A) | Phase A: synthesize immediately, retire the agent, and backfill its Explore slot. Phase B: independently verify, hand the single writer lane to the next eligible task, then archive/remove the prior completion while that writer runs. |
 | `BLOCKED:` | → `blocked` | Populate `blockerLog` → dispatch research agent → revise spec → re-dispatch |
 | `PAUSE:` (agent-initiated) | → `paused` | Present agent's options to Architect → wait for architect decision → resume at prior state |
 | `PAUSE:` (gate, strategic) | → `paused` | Present PLAN.md alignment gate to Architect → wait for APPROVED → resume |
@@ -224,13 +225,22 @@ This section consolidates all non-negotiable guardrails: dispatch rules, termina
 ### Agent Dispatch
 
 - Max 4 Explore agents in parallel — avoid context fragmentation
-- Keep Explore tasks narrow enough to finish independently; as each returns, immediately backfill its slot with the next pending research task instead of waiting for the full wave
+- Keep Explore tasks narrow enough to finish independently; as each returns, retire its handle and immediately backfill its slot with the next pending research task instead of waiting for the full wave
 - Explore agents are read-only and may overlap source reads or future implementation `targetFiles`; they must record the source files they relied on and upstream assumptions so the spec can be revalidated before Phase B
 - Exactly one general-purpose Phase B product-code agent may be active across the project; research readiness does not waive implementation dependencies
 - The Orchestrator may maintain `.tasks.json` and root `log.md` while that agent runs because delegated product-code agents never write those state files
 - Always include TERMINATION block in every dispatch
 - Include in every dispatch: task description, success criteria, files to modify, relevant plan context (from PLAN.md), and any operational constraints relevant to the task. The orchestrator is responsible for distilling CLAUDE.md rules into targeted constraints — agents do NOT read CLAUDE.md themselves.
 - **All implementation dispatches must be idempotent.** Before executing file modifications, agents must read the target files to assess whether parts of the specification have already been applied by a previous partial run.
+
+### Agent Handle Lifecycle (Non-Negotiable)
+
+A dispatched agent is an **open concurrency handle**, not an ephemeral logical slot. Returning a terminal signal (`COMPLETE` / `BLOCKED:` / `PAUSE:`) does **not** retire the handle — the agent continues to occupy its concurrency slot until the Orchestrator explicitly stops/closes it. The platform concurrency cap counts open handles, not active work, so completed-but-unclosed agents accumulate and will starve the writer lane. This was the root cause of a Phase B writer failing to dispatch with an "agent-thread limit" error while multiple completed research agents remained open.
+
+- **Retire on terminal:** On every terminal signal, retire the agent (close/stop its handle) as the **first** step of the terminal transition, *before* treating its slot as free or dispatching a successor. A successor must never be blocked by an agent the Orchestrator forgot to close.
+- **Track live handles:** Maintain the `activeAgents` registry in `.tasks.json`. Add an entry on dispatch (agent id/name, served taskId, phase, state, dispatch timestamp); remove it on retire. **Read this registry before every new dispatch** to know the true count of consumed slots — never reason about slot availability from memory.
+- **Backfill = retire, then fill:** Every "backfill the freed slot" instruction in this document means: retire the returning agent first, then dispatch the next into the now-actually-free slot. A slot is free **only** after its handle is closed.
+- **`MAX_PARALLEL_EXPLORE = 4` bounds open handles, not just active research.** The count must include any completed agent not yet retired. The unsanctioned act of spawning a *replacement* agent while the original is still open doubles consumption and is forbidden — wait on the original or stop it explicitly; never shadow it with a second live handle.
 
 ### Termination (Non-Negotiable)
 

@@ -58,6 +58,10 @@
       "progressEntries": [],
       "lookaheadPhases": {
         "description": "Active research/spec state for Architect-approved downstream phases, researched ahead while the current phase implements. Each entry mirrors the root phase shape (phaseId, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries). Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Entries are active non-completed records, not history."
+      },
+      "activeAgents": {
+        "description": "Live registry of currently-open agent handles (agent id/name, served taskId, phase, state, dispatch timestamp, terminal-pending flag). Add on dispatch; remove on retire. Orchestrator source of truth for true concurrency consumption — consult before any new dispatch. Resets to empty on directive completion.",
+        "entries": []
       }
     },
     "_archive": {
