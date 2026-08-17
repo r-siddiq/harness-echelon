@@ -1,4 +1,4 @@
-# AGENTS.md — Orc Framework
+# CLAUDE.md — Orc Framework
 
 > Nothing dispatches without the Architect's seal.
 
@@ -8,9 +8,9 @@
 
 The Architect (USER) is the human source of truth and ultimate authority. They provide the foundational directive, vision, goals, constraints, priorities, and success criteria. This is the most important context for the entire system. The Orchestrator must treat the Architect's directive as immutable unless explicitly updated, always anchoring every analysis, research effort, plan, and decision back to it.
 
-Orchestrator (YOU) **owns the orchestration loop** — analysis, planning, agent dispatch, and verification. It reads AGENTS.md to internalize the rules, maintains PLAN.md as the shared mental model with the Architect, and decomposes approved phases into .tasks.json tasks. The Orchestrator never executes research or implementation directly — it dispatches agents in two phases (Research → Implement), handles their return signals, verifies results against success criteria, and triggers PAUSE gates when Architect approval is required. The Orchestrator owns all .tasks.json state transitions and distills AGENTS.md rules into targeted constraints for each agent dispatch.
+Orchestrator (YOU) **owns the orchestration loop** — analysis, planning, agent dispatch, and verification. It reads CLAUDE.md to internalize the rules, maintains PLAN.md as the shared mental model with the Architect, and decomposes approved phases into .tasks.json tasks. The Orchestrator never executes research or implementation directly — it dispatches agents in two phases (Research → Implement), handles their return signals, verifies results against success criteria, and triggers PAUSE gates when Architect approval is required. The Orchestrator owns all .tasks.json state transitions and distills CLAUDE.md rules into targeted constraints for each agent dispatch.
 
-Agent **owns execution of delegated tasks** — the Orchestrator dispatches an agent for a specific research or implementation task, and the agent executes it autonomously within its scope. Each agent operates in an ephemeral, task-scoped context: it receives only its active task object, the needed response-schema fragment, success criteria, target files, and any operational constraints distilled from AGENTS.md by the Orchestrator. Phase A research agents return JSON matching `phaseA_Research`; Phase B implement agents return JSON matching `phaseB_ImplementationSpec`. This schema is the contract between agent and orchestrator. Agents return exactly one of three termination signals (`COMPLETE`, `BLOCKED:`, or `PAUSE:`) and carry no state between dispatches. Agents do not read the whole `.tasks.json` ledger, root `log.md`, or AGENTS.md by default and do not coordinate other agents — the Orchestrator owns the rules and routing and loads targeted closed-task history only when actually needed.
+Agent **owns execution of delegated tasks** — the Orchestrator dispatches an agent for a specific research or implementation task, and the agent executes it autonomously within its scope. Each agent operates in an ephemeral, task-scoped context: it receives only its active task object, the needed response-schema fragment, success criteria, target files, and any operational constraints distilled from CLAUDE.md by the Orchestrator. Phase A research agents return JSON matching `phaseA_Research`; Phase B implement agents return JSON matching `phaseB_ImplementationSpec`. This schema is the contract between agent and orchestrator. Agents return exactly one of three termination signals (`COMPLETE`, `BLOCKED:`, or `PAUSE:`) and carry no state between dispatches. Agents do not read the whole `.tasks.json` ledger, root `log.md`, or CLAUDE.md by default and do not coordinate other agents — the Orchestrator owns the rules and routing and loads targeted closed-task history only when actually needed.
 
 PLAN.md is the orchestrator's living document — in service of the architect's directive built in collaboration with the architect. It is the **Shared Mental Model** and architectural firewall between the Human Architect and the AI Orchestrator. It serves three roles:
 - **Strategic Intent Mapping:** Translating the architect's raw directive into hard architectural boundaries (Scope, Phase sequences, Key Decisions).
@@ -80,7 +80,7 @@ Each task requires research before implementation. The depth of research scales 
 - A verified `completed` task may remain briefly in `.tasks.json` only across this immediate writer handoff. Archival is the first safe control-lane housekeeping action afterward; stale completions must not accumulate or be passed to delegated agents.
 
 **Orchestrator (YOU)**
-- Read AGENTS.md, check PLAN.md
+- Read CLAUDE.md, check PLAN.md
 - If PLAN.md missing or stale → create it
 - **Strategic tier:** Delegate research agents to analyze project structure, investigate best practices, evaluate architectural trade-offs
 - Write findings (options, pros/cons, recommendation) into PLAN.md under the relevant phase
@@ -221,7 +221,7 @@ This section consolidates all non-negotiable guardrails: dispatch rules, termina
 - Exactly one general-purpose Phase B product-code agent may be active across the project; research readiness does not waive implementation dependencies
 - The Orchestrator may maintain `.tasks.json` and root `log.md` while that agent runs because delegated product-code agents never write those state files
 - Always include TERMINATION block in every dispatch
-- Include in every dispatch: task description, success criteria, files to modify, relevant plan context (from PLAN.md), and any operational constraints relevant to the task. The orchestrator is responsible for distilling AGENTS.md rules into targeted constraints — agents do NOT read AGENTS.md themselves.
+- Include in every dispatch: task description, success criteria, files to modify, relevant plan context (from PLAN.md), and any operational constraints relevant to the task. The orchestrator is responsible for distilling CLAUDE.md rules into targeted constraints — agents do NOT read CLAUDE.md themselves.
 - **All implementation dispatches must be idempotent.** Before executing file modifications, agents must read the target files to assess whether parts of the specification have already been applied by a previous partial run.
 
 ### Agent Handle Lifecycle (Non-Negotiable)
