@@ -1,0 +1,6 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Local agent/tool state — never part of the framework
+.playwright-mcp/
