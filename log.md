@@ -26,7 +26,7 @@ After orchestrator verification, archive the completed task's full JSON object a
   "targetFiles": [],
   "successCriteria": [],
   "dispatches": {
-    "researchAgent": "Explore | general-purpose",
+    "researchAgent": "Explore | read-only host equivalent",
     "implementAgent": "general-purpose"
   },
   "phaseA_Research": {

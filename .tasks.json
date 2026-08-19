@@ -4,15 +4,27 @@
   "_persistentState": {
     "description": "PERSISTENT EXECUTION LEDGER — Schema reference for task decomposition. Two-Phase Dispatch (Research -> Implement) handled at Phase level. This template is immutable — it defines the contract, not the work.",
     "structure": {
-      "schemaVersion": "1.0",
+      "schemaVersion": "1.1",
       "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md",
+      "planPhaseRef": "Exact phase row from the Architect-approved PLAN.md",
       "phaseDescription": "The high-level goal, boundaries, and context of this phase as defined by the Architect",
       "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
+      "phaseHealth": {
+        "total": 0,
+        "pending": 0,
+        "researching": 0,
+        "spec_ready": 0,
+        "implementing": 0,
+        "completed": 0,
+        "blocked": 0,
+        "paused": 0
+      },
       "tasks": {
         "_taskId": {
           "id": "Descriptive task ID matching phase hierarchy",
           "description": "Granular action item required to achieve the active phase goal",
           "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
+          "agent": "Current or most recent agent type/name/session and dispatch phase",
           "retryCounter": 0,
           "maxRetryLimit": 3,
           "turnSelfAssessment": {
@@ -25,7 +37,7 @@
           "targetFiles": [],
           "successCriteria": [],
           "dispatches": {
-            "researchAgent": "Explore | general-purpose",
+            "researchAgent": "Explore | read-only host equivalent",
             "implementAgent": "general-purpose"
           },
           "phaseA_Research": {
@@ -57,7 +69,7 @@
       "phaseSuccessCriteria": [],
       "progressEntries": [],
       "lookaheadPhases": {
-        "description": "Active research/spec state for Architect-approved downstream phases, researched ahead while the current phase implements. Each entry mirrors the root phase shape (phaseId, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries). Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Entries are active non-completed records, not history."
+        "description": "Active research/spec state for downstream phases in the Architect-approved PLAN.md, researched ahead while the current phase implements. Each entry mirrors the phase-scoped root shape (phaseId, planPhaseRef, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries); the global activeAgents registry remains at the runtime root. Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Entries are active non-completed records, not history."
       },
       "activeAgents": {
         "description": "Live registry of currently-open agent handles (agent id/name, served taskId, phase, state, dispatch timestamp, terminal-pending flag). Add on dispatch; remove on retire. Orchestrator source of truth for true concurrency consumption — consult before any new dispatch. Resets to empty on directive completion.",
@@ -70,7 +82,7 @@
     }
   },
 
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "phaseId": "",
   "planPhaseRef": "",
   "phaseDescription": "",
@@ -88,5 +100,6 @@
   "tasks": {},
   "phaseSuccessCriteria": [],
   "progressEntries": [],
-  "lookaheadPhases": []
+  "lookaheadPhases": [],
+  "activeAgents": []
 }

@@ -6,11 +6,11 @@
 
 ## Architect's Directive
 
-*[Raw directive from the architect — vision, goals, constraints, priorities, and success criteria. This is the immutable anchor for all downstream work. Updates only via explicit architect instruction. Include the qualification posture: performance/accuracy trade-off authority, release evidence requirements, and any standing approval wording that gates execution.]*
+*[Raw directive from the architect — vision, goals, constraints, priorities, and success criteria. This is the immutable anchor for all downstream work. Updates only via explicit architect instruction. Include decision authority, required evidence, release or acceptance conditions, and any standing approval wording that gates execution.]*
 
-### First-class objectives and qualification posture
+### Objectives and decision posture
 
-*[Performance and accuracy are co-equal first-class objectives unless the directive says otherwise. State the accuracy-over-speed authority, the latency reporting granularity, the rule that thresholds are qualification criteria (not guarantees) changeable only through measured qualification and the applicable Architect gate, and the release-evidence requirements.]*
+*[List the first-class objectives and their priority or trade-off authority. Define measurable qualification criteria, evidence requirements, and which thresholds or decisions may change only through measured validation and Plan Approval.]*
 
 ---
 
@@ -24,19 +24,19 @@
 
 ### Boundaries
 
-*[Hard constraints: identity discovery rules, authority placement, supported surfaces, excluded mechanisms, test-only tooling boundaries, and evidence authority.]*
+*[Hard constraints: authority placement, supported and excluded capabilities, compatibility requirements, safety or security boundaries, test-only mechanisms, and evidence authority.]*
 
 ---
 
 ## Selected Solution Architecture
 
-*[Populated by orchestrator's strategic research agents before tactical work begins. Each architectural decision area includes: options explored, pros/cons, and a recommendation. This section is the research grounding for the phase plan below. Strategic selection is not implementation authorization — no task may be decomposed or executed while its alignment gate is PENDING.]*
+*[Populated by the orchestrator from strategic research-agent findings before tactical work begins. Each architectural decision area includes: evidence, options explored, pros/cons, and a recommendation. This section is the research grounding for the phase plan below. Strategic selection is not implementation authorization — no task may be decomposed or executed while Plan Approval is PENDING.]*
 
 ---
 
 ## Implementation Phases and Sequencing
 
-*[Sequence of phases decomposed from the directive. Each phase is a discrete unit of work with a clear goal and completion criteria. The active phase is tracked in .tasks.json. Phases may be decomposed for parallel execution only when their approved tasks have non-overlapping target files.]*
+*[Sequence of phases decomposed from the directive. Each phase is a discrete unit of work with a clear goal and completion criteria. After Plan Approval, every listed phase is seeded into .tasks.json as the root active phase or lookahead state. Research may run in parallel; Phase B implementation remains ordered by phase, dependencies, and conflicts.]*
 
 | # | Phase | Execution goal | Depends on | Status |
 |---|-------|----------------|------------|--------|
@@ -44,19 +44,19 @@
 
 ---
 
-## Architect Alignment Gates
+## Architect Plan Approval
 
-*[Per-phase approval tracker. The orchestrator MUST NOT proceed to tactical decomposition (.tasks.json) for any phase until its gate is APPROVED. Approval is bound to the reviewed plan content; a later architecture change returns only the affected gates to PENDING before decomposition or implementation. If a tactical block requires altering the high-level architecture, the affected gate reverts to PENDING and a strategic PAUSE is triggered.]*
+*[Whole-plan approval tracker. Status is PENDING until the Architect approves the complete blueprint and phase sequence, then APPROVED. The orchestrator MUST NOT proceed to tactical decomposition while PENDING. Approval is bound to a recorded plan version. A later directive or architectural change creates a revised PENDING version, pauses affected execution, and stales only dependent task research; demonstrably unaffected work remains valid under the prior approved version.]*
 
-| Phase | Status | Approval subject | Recorded |
-|-------|--------|------------------|----------|
-| -     | -      | -                | -        |
+| Plan version | Status | Approval subject | Recorded |
+|--------------|--------|------------------|----------|
+| -            | -      | -                | -        |
 
 ---
 
 ## Active Architecture Decisions
 
-*[Significant decisions made during the engagement, with their execution consequence. Provides an audit trail for why certain paths were chosen. Changing a locked decision requires the affected phase gate to remain or revert to PENDING.]*
+*[Significant decisions made during the engagement, with their execution consequence. Provides an audit trail for why certain paths were chosen. Changing a locked decision creates a revised plan version whose approval remains PENDING until the Architect accepts it.]*
 
 | ID | Locked decision | Execution consequence |
 |----|-----------------|-----------------------|
@@ -76,7 +76,7 @@
 
 ## Acceptance Criteria
 
-*[Measurable, verifiable success criteria grouped by area. Thresholds and targets are qualification criteria, not unconditional guarantees; a target may change only through measured qualification and the applicable Architect gate.]*
+*[Measurable, verifiable success criteria grouped by area. Thresholds and targets are qualification criteria, not unconditional guarantees; a target may change only through measured qualification and Plan Approval of the revised blueprint.]*
 
 ### Control and durability
 
@@ -86,7 +86,7 @@
 
 - *[...]*
 
-### Telemetry and performance qualification
+### Operational quality and evidence
 
 - *[...]*
 
@@ -102,6 +102,6 @@
 
 ## Held Boundaries
 
-*[Approaches explicitly rejected or held pending the relevant evidence and the applicable Architect gate.]*
+*[Approaches explicitly rejected or held pending the relevant evidence and Plan Approval.]*
 
 - *[...]*
