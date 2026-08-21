@@ -1,12 +1,12 @@
 {
-  "_comment": "BASE TEMPLATE — Do not remove or modify framework schema sections. Runtime state (below) resets to defaults on directive completion.",
+  "_comment": "BASE TEMPLATE — Do not remove or modify framework schema sections. This is a forward-looking queue for unfinished work only; runtime state resets to defaults on directive completion.",
 
   "_persistentState": {
-    "description": "PERSISTENT EXECUTION LEDGER — Schema reference for task decomposition. Two-Phase Dispatch (Research -> Implement) handled at Phase level. This template is immutable — it defines the contract, not the work.",
+    "description": "PERSISTENT ACTIVE-WORK SCHEMA — Reference for approved task decomposition, targeted research, and implementation dispatch. Strategic plan evidence is the default basis; Phase A research is optional and reserved for blockers, drift, external facts, or material uncertainty. This template is immutable — it defines the contract, not the work.",
     "structure": {
-      "schemaVersion": "1.1",
+      "schemaVersion": "1.3",
       "phaseId": "Descriptive hyphenated ID derived exactly from PLAN.md",
-      "planPhaseRef": "Exact phase row from the Architect-approved PLAN.md",
+      "planPhaseRef": "Exact phase row governed by an approved PLAN.md subject",
       "phaseDescription": "The high-level goal, boundaries, and context of this phase as defined by the Architect",
       "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
       "phaseHealth": {
@@ -21,68 +21,57 @@
       },
       "tasks": {
         "_taskId": {
-          "id": "Descriptive task ID matching phase hierarchy",
-          "description": "Granular action item required to achieve the active phase goal",
+          "id": "Log-unique descriptive task ID prefixed by the exact Directive ID recorded in PLAN.md and matching phase hierarchy",
+          "description": "Unfinished action item required to achieve the active phase goal",
           "state": "pending | researching | spec_ready | implementing | completed | blocked | paused",
-          "agent": "Current or most recent agent type/name/session and dispatch phase",
-          "retryCounter": 0,
-          "maxRetryLimit": 3,
-          "turnSelfAssessment": {
-            "ruleAdherence": null,
-            "contextSanitation": null,
-            "frictionTrace": ""
-          },
           "dependsOn": [],
           "conflictsWith": [],
           "targetFiles": [],
+          "sharedSurfaces": [],
+          "parallelSafe": false,
           "successCriteria": [],
-          "dispatches": {
-            "researchAgent": "Explore | read-only host equivalent",
-            "implementAgent": "general-purpose"
-          },
-          "phaseA_Research": {
-            "summary": "",
-            "decisions": [],
-            "context": { "fileStructure": "", "apiPattern": "", "dataFlow": "", "gotchas": [] }
-          },
           "researchBasis": {
+            "planDecisionRefs": [],
             "sourceFiles": [],
             "upstreamAssumptions": [],
             "status": "provisional | current | stale"
           },
           "phaseB_ImplementationSpec": {
             "instructions": "",
-            "specificFilesToModify": [],
             "verificationChecklist": []
-          },
-          "blockerLog": {
-            "reason": "",
-            "researchNeeded": "",
-            "escalation": {
-              "needsGateReversion": false,
-              "affectedPlanPhase": "",
-              "recommendedArchitectAction": ""
-            }
           }
+        }
+      },
+      "optionalTaskState": {
+        "description": "Attach only while the corresponding state is active; remove after its result is synthesized into researchBasis, phaseB_ImplementationSpec, or progressEntries.",
+        "phaseA_Research": {
+          "presentWhen": "targeted research is active or a returned result is being synthesized",
+          "purpose": "Blocker, drift, external fact, or material uncertainty that could change this task",
+          "summary": "",
+          "decisions": [],
+          "sourceFiles": [],
+          "upstreamAssumptions": []
+        },
+        "blockerLog": {
+          "presentWhen": "state is blocked, researching that blocker, or paused from either state; remove only after resolution is synthesized",
+          "reason": "",
+          "researchNeeded": "",
+          "requiresPlanRevision": false
         }
       },
       "phaseSuccessCriteria": [],
       "progressEntries": [],
       "lookaheadPhases": {
-        "description": "Active research/spec state for downstream phases in the Architect-approved PLAN.md, researched ahead while the current phase implements. Each entry mirrors the phase-scoped root shape (phaseId, planPhaseRef, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries); the global activeAgents registry remains at the runtime root. Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Entries are active non-completed records, not history."
+        "description": "Unfinished downstream task shells from the Architect-approved PLAN.md. Each entry mirrors the phase-scoped root shape (phaseId, planPhaseRef, phaseDescription, state, phaseHealth, tasks, phaseSuccessCriteria, progressEntries); the global activeAgents registry remains at the runtime root. Lookahead tasks may be pending/researching/spec_ready/blocked/paused but never implementing until the phase is promoted to root. Do not retain completed tasks, raw research history, or stale superseded briefs here."
       },
       "activeAgents": {
-        "description": "Live registry of currently-open agent handles (agent id/name, served taskId, phase, state, dispatch timestamp, terminal-pending flag). Add on dispatch; remove on retire. Orchestrator source of truth for true concurrency consumption — consult before any new dispatch. Resets to empty on directive completion.",
+        "description": "Live registry of currently-open agent handles (agent id/name, served task or strategic-question ID, root/lookahead/strategic phase, state: researching/implementing/verifying, dispatch timestamp). Add on dispatch; remove on retire. A verifier handle does not add a new task state: its task remains implementing until the Orchestrator accepts its evidence. Consult before any new dispatch and reconcile with host live handles on resume. Resets to empty on directive completion.",
         "entries": []
       }
-    },
-    "_archive": {
-      "description": "PERSISTENT ARCHIVE — Survives directive completion and runtime reset. Schema-compatible legacy section; runtime completion history is preserved in root log.md, not here.",
-      "completedDirectives": []
     }
   },
 
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.3",
   "phaseId": "",
   "planPhaseRef": "",
   "phaseDescription": "",

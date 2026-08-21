@@ -1,77 +1,26 @@
-# Closed-Task History
+# Closed-Task Summaries
 
-This root log preserves closed-task history. Each section contains the completed task's full JSON object and only the chronological `progressEntries` whose `taskId` exactly matches that task.
+This root log is a compact record of completed work. It is not a second task ledger.
 
-After orchestrator verification, archive the completed task's full JSON object and its exact matching task-specific progress here, then remove those records from `.tasks.json` and recompute `phaseHealth`. Blocked, paused, and all other non-completed work stays active in `.tasks.json`.
+After accepting independent verifier evidence, the Orchestrator records one short closure note, then removes the completed task and its active progress from `.tasks.json`. On resume, reconcile by exact task ID: an existing closure is not appended again and means the transient completed task may be removed. Do not copy raw task JSON, Phase A research, Phase B briefs, full success criteria, file inventories, dispatch events, or agent telemetry here. Keep detailed implementation history in the repository and keep active routing detail only in `.tasks.json`.
 
-## `PHASE-X-Task-Y`
+## `DIRECTIVE-ID-Phase-X-Task-Y`
 
-### Task object
+### Closure note
 
-```json
-{
-  "id": "PHASE-X-Task-Y",
-  "description": "Granular action item required to achieve the active phase goal",
-  "state": "completed",
-  "agent": "general-purpose:<name>:<session-id>:phase-b-complete",
-  "retryCounter": 0,
-  "maxRetryLimit": 3,
-  "turnSelfAssessment": {
-    "ruleAdherence": "",
-    "contextSanitation": "",
-    "frictionTrace": ""
-  },
-  "dependsOn": [],
-  "conflictsWith": [],
-  "targetFiles": [],
-  "successCriteria": [],
-  "dispatches": {
-    "researchAgent": "Explore | read-only host equivalent",
-    "implementAgent": "general-purpose"
-  },
-  "phaseA_Research": {
-    "summary": "",
-    "decisions": [],
-    "context": {
-      "fileStructure": "",
-      "apiPattern": "",
-      "dataFlow": "",
-      "gotchas": []
-    }
-  },
-  "researchBasis": {
-    "sourceFiles": [],
-    "upstreamAssumptions": [],
-    "status": "current"
-  },
-  "phaseB_ImplementationSpec": {
-    "instructions": "",
-    "specificFilesToModify": [],
-    "verificationChecklist": []
-  },
-  "blockerLog": {
-    "reason": "",
-    "researchNeeded": "",
-    "escalation": {
-      "needsGateReversion": false,
-      "affectedPlanPhase": "",
-      "recommendedArchitectAction": ""
-    }
-  }
-}
-```
+- **Outcome:** *[What was completed and its user- or system-visible result.]*
+- **Decision or evidence:** *[Only the material research decision, if one affected the result; otherwise “Used approved plan evidence.”]*
+- **Implementation:** *[Concise summary of the change; no raw file list or task object.]*
+- **Verification:** *[Compact verifier evidence and Orchestrator acceptance outcome.]*
+- **Blocker resolution:** *[Only if material; otherwise “None.”]*
 
-### Matching progress entries
+---
 
-```json
-[
-  {
-    "timestamp": "YYYY-MM-DDTHH:MM:SS.ssssssZ",
-    "event": "phase_b_implementation_verified_complete",
-    "phaseId": "PHASE-X",
-    "taskId": "PHASE-X-Task-Y",
-    "agent": "",
-    "summary": ""
-  }
-]
-```
+## Directive closure — `DIRECTIVE-ID`
+
+- **Delivered outcome:** *[What the completed directive delivered.]*
+- **Selected architecture:** *[The material architecture decision retained for future context.]*
+- **Material deviations or blocker resolutions:** *[Only meaningful departures from the approved plan.]*
+- **Final verification:** *[Accepted aggregate verifier evidence and result.]*
+
+After this summary is written, reset PLAN.md to its skeleton and reset `.tasks.json` runtime state. On resume, an existing exact Directive ID means complete the reset without appending another directive closure. Do not reproduce the completed plan or task history here.
